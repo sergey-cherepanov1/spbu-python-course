@@ -66,7 +66,7 @@ while True:
                 vec2_len = sum([i**2 for i in vector2]) ** 0.5
                 print(f"Angle: {180 * acos(scal_prod / (vec1_len * vec2_len)) / pi}")
             print(
-                "If you want to perform other operation enter [y], else the program will finish: ",
+                "If you want to perform another operation enter [y], else the program will finish: ",
                 end="",
             )
             verification = input().strip()
