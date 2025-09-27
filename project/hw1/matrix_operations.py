@@ -21,7 +21,7 @@ def check_matrices(matrix_1: list[list[float]], matrix_2: list[list[float]]) -> 
     if len(matrix_1) != len(matrix_2):
         return False
     n = len(matrix_1)
-    if len(matrix_1) == 0:
+    if n == 0:
         return False
     if len(matrix_1[0]) != len(matrix_2[0]):
         return False
@@ -52,7 +52,8 @@ def add_matrices(
 
     if check_matrices(matrix_1, matrix_2):
         n = len(matrix_1)
-        return [[matrix_1[i][j] + matrix_2[i][j] for j in range(n)] for i in range(n)]
+        m = len(matrix_1[0])
+        return [[matrix_1[i][j] + matrix_2[i][j] for j in range(m)] for i in range(n)]
     raise ValueError("Invalid matrices")
 
 

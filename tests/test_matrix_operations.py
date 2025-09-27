@@ -31,6 +31,13 @@ def test_add_matrices_error():
         mo.add_matrices(m1, m2)
 
 
+def test_add_rectangular_matrices():
+    """Test addition of non-square matrices."""
+    m1 = [[1, 2, 3], [4, 5, 6]]
+    m2 = [[7, 8, 9], [10, 11, 12]]
+    assert mo.add_matrices(m1, m2) == [[8, 10, 12], [14, 16, 18]]
+
+
 def test_multiply_matrices_2x2():
     """Test of multiplication of two 2x2 matrices."""
     m1 = [[1, 2], [3, 4]]
