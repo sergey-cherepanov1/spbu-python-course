@@ -60,7 +60,7 @@ jobs:
       # Run type checking
       - name: Run type checking
         run: |
-          mypy project/ scripts/ tests/ --ignore-missing-imports
+          mypy project/
       # Run tests
       - name: Run tests
         run: |

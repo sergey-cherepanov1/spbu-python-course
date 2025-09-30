@@ -1,5 +1,6 @@
 import pytest
 from hw1 import vector_operations as vo
+from math import isclose
 
 
 def test_dot_product_basic():
@@ -28,7 +29,7 @@ def test_angle_parallel_vectors():
     """Parallel vectors test."""
     v1 = [1, 2]
     v2 = [2, 4]
-    assert abs(vo.angle(v1, v2) - 0.0) < 0.00001
+    assert isclose(vo.angle(v1, v2), 0.0, abs_tol=1e-5)
 
 
 def test_angle_orthogonal_vectors():
