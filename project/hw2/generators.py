@@ -38,7 +38,7 @@ def collect(
 
 
 def convey(
-    data: Iterable[Any],
+    data: Iterator[Any],
     operations: Iterable[tuple[Callable[..., Any], tuple[Any], dict[str, Any]]],
 ) -> Iterator[Any]:
     """
@@ -52,15 +52,14 @@ def convey(
         Iterator after all operations are applied.
     """
 
-    generator = generate(data)
     for op in operations:
-        prepared_func = unify_func(*op)
-        generator = prepared_func(generator)
+        prepared_func = unify(op[0], *op[1], **op[2])
+        data = prepared_func(data)
 
-    return generator
+    return data
 
 
-def unify_func(
+def unify(
     f: Callable[..., Any], *args: Any, **kwargs: Any
 ) -> Callable[[Iterable[Any]], Iterator[Any]]:
     """
@@ -76,11 +75,11 @@ def unify_func(
     """
 
     if f in [map, filter, zip, enumerate]:
-        return lambda it: f(*args, it, **kwargs)
+        return lambda it: f(*args, it)
     elif f == reduce:
         if len(args) == 2:
-            return lambda it: iter([f(args[0], it, args[1], **kwargs)])
+            return lambda it: iter([f(args[0], it, args[1])])
         else:
-            return lambda it: iter([f(*args, it, **kwargs)])
+            return lambda it: iter([f(args[0], it)])
     else:
         return lambda it: f(it, *args, **kwargs)
