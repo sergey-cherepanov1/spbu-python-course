@@ -4,8 +4,8 @@ Decorator for smart argument handling and caching.
 
 from functools import wraps
 from collections import OrderedDict
-from typing import Any, Callable, Optional, Dict
-import copy
+from typing import Any, Callable, Dict
+import copy, inspect
 
 
 class Evaluated:
@@ -25,7 +25,7 @@ class Isolated:
     pass
 
 
-def smart_args(capacity: int = 0) -> Callable[..., Any]:
+def smart_args(*, capacity: int = 0, pos_args: bool = False) -> Callable[..., Any]:
     """
     Decorator for caching function results with smart argument handling.
 
@@ -38,28 +38,57 @@ def smart_args(capacity: int = 0) -> Callable[..., Any]:
 
     def decorator(func: Callable[..., Any]) -> Callable[..., Any]:
         cache: OrderedDict = OrderedDict()
+        spec = inspect.getfullargspec(func)
 
         @wraps(func)
         def inner(*args: Any, **kwargs: Any) -> Any:
-            def_kwargs = func.__kwdefaults__
+            def_kwargs = spec.kwonlydefaults
             if def_kwargs:
                 for k in def_kwargs:
-                    if type(def_kwargs[k]) == Evaluated:
-                        kwargs[k] = def_kwargs[k].func()
-                    elif type(def_kwargs[k]) == Isolated:
-                        kwargs[k] = copy.deepcopy(kwargs[k])
 
+                    if type(def_kwargs[k]) == Evaluated and def_kwargs[k].func == Isolated:
+                        assert False, "Cannot combine Evaluated and Isolated"
+                        
+                    if type(def_kwargs[k]) == Evaluated and k not in kwargs:
+                        kwargs[k] = def_kwargs[k].func()
+                    elif type(def_kwargs[k]) == Isolated and kwargs[k]:
+                        kwargs[k] = copy.deepcopy(kwargs[k])
+                        
+            def_args = spec.defaults
+            if (pos_args and def_args):
+                args = list(args)
+                for a in range(len(def_args)):
+                    index = a + (len(args) - len(def_args))
+                    
+                    if type(def_args[a]) == Evaluated and def_args[a].func == Isolated:
+                        assert False, "Cannot combine Evaluated and Isolated"
+                    
+                    if type(def_args[a]) == Evaluated:
+                        try:
+                            args[index] = def_args[a].func()
+                        except:
+                            print("A positional argument with default value Evaluated was not passed.")
+                            raise
+                            
+                    elif type(def_args[a]) == Isolated:
+                        try:
+                            args[index] = copy.deepcopy(args[index])
+                        except IndexError:
+                            print("A positional argument with default value Isolated was not passed.")
+                            raise
+            
             if capacity <= 0:
                 return func(*args, **kwargs)
+            
             try:
-                key = hash((args, tuple(sorted(kwargs.items()))))
+                key = hash((tuple(args), tuple(sorted(kwargs.items()))))
             except TypeError:
                 return func(*args, **kwargs)
 
             if key in cache:
                 cache.move_to_end(key)
-                print(cache)
                 return cache[key]
+            
             if len(cache) == capacity:
                 cache.popitem(last=False)
 
@@ -69,3 +98,4 @@ def smart_args(capacity: int = 0) -> Callable[..., Any]:
         return inner
 
     return decorator
+    

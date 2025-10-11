@@ -27,18 +27,16 @@ def curry_explicit(func: Callable[..., Any], arity: int) -> Callable[..., Any]:
         raise ValueError("Arity cannot be negative.")
 
     @functools.wraps(func)
-    def curried(*args, **kwargs):
-        args_count = len(args) + len(kwargs)
-
-        if args_count > arity:
+    def curried(*args):
+        if len(args) > arity:
             raise ValueError(
                 f"Too many arguments. Expected {arity}, given {args_count}."
             )
 
-        if args_count == arity:
-            return func(*args, **kwargs)
+        if len(args) == arity:
+            return func(*args)
         else:
-            return lambda *args1, **kwargs1: curried(*args, *args1, **kwargs, **kwargs1)
+            return lambda *args1: curried(*args, *args1)
 
     return curried
 
