@@ -86,8 +86,8 @@ def smart_args(*, capacity: int = 0, pos_args: bool = False) -> Callable[..., An
                 for i in range(start):
                     if isinstance(spec_defaults[i], Isolated):
                         args_l[shift + i] = copy.deepcopy(args_l[shift + i])
+                args = tuple(args_l)
 
-            args = tuple(args_l)
             if capacity <= 0:
                 return func(*args, **kwargs)
             try:

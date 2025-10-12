@@ -30,7 +30,7 @@ def curry_explicit(func: Callable[..., Any], arity: int) -> Callable[..., Any]:
     def curried(*args):
         if len(args) > arity:
             raise ValueError(
-                f"Too many arguments. Expected {arity}, given {args_count}."
+                f"Too many arguments. Expected {arity}, given {len(args)}."
             )
 
         if len(args) == arity:
