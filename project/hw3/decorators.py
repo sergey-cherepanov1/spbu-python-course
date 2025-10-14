@@ -92,8 +92,8 @@ def smart_args(*, pos_args: bool = False) -> Callable[..., Any]:
         return inner
 
     return decorator
-    
-    
+
+
 def cache(*, capacity: int = 0) -> Callable[..., Any]:
     """
     Decorator for caching function results.

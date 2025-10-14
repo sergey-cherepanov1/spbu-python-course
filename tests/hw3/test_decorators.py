@@ -166,24 +166,20 @@ def test_complex_mixed_arguments():
     assert result_a2 == [1, 2, "changed_2"]
     assert result_y2 == {"a": 0, "new": "changed_2"}
 
+
 def test_not_every_arg_defaulted():
     """Test functions with args that dont have default values"""
-    
+
     @smart_args(pos_args=True)
     def f(pos1, pos2=Isolated(), *, kw1, kw2=Evaluated(lambda: "!!!")):
         pos2.append(pos1)
-        return {
-            'pos1': pos1,
-            'pos2': pos2,
-            'kw1': kw1,
-            'kw2': kw2
-        }
-    
+        return {"pos1": pos1, "pos2": pos2, "kw1": kw1, "kw2": kw2}
+
     isolated = ["a"]
-    
+
     result = f(10, isolated, kw1=5)
-    assert result['pos1'] == 10
-    assert result['pos2'] == ["a", 10]
+    assert result["pos1"] == 10
+    assert result["pos2"] == ["a", 10]
     assert isolated == ["a"]
-    assert result['kw1'] == 5
-    assert result['kw2'] == "!!!"
+    assert result["kw1"] == 5
+    assert result["kw2"] == "!!!"
