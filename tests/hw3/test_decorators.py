@@ -1,14 +1,14 @@
 import pytest
 from collections import OrderedDict
 from typing import Dict, List
-from hw3.decorator import smart_args, Evaluated, Isolated
+from hw3.decorators import smart_args, cache, Evaluated, Isolated
 
 
 def test_basic_caching():
     """Test that basic caching works with same arguments"""
     call_count = 0
 
-    @smart_args(capacity=2)
+    @cache(capacity=2)
     def f(x):
         nonlocal call_count
         call_count += 1
@@ -25,7 +25,7 @@ def test_cache_capacity():
     """Test for cache capacity limits"""
     call_count = 0
 
-    @smart_args(capacity=2)
+    @cache(capacity=2)
     def f(x):
         nonlocal call_count
         call_count += 1
@@ -139,7 +139,8 @@ def test_complex_mixed_arguments():
         counter_2 += 1
         return counter_2
 
-    @smart_args(pos_args=True, capacity=5)
+    @cache(capacity=5)
+    @smart_args(pos_args=True)
     def complex_func(
         a=Isolated(),
         b=Evaluated(check_evaluation_1),
@@ -164,3 +165,25 @@ def test_complex_mixed_arguments():
     result_a2, result_y2 = complex_func(args, y=kws)
     assert result_a2 == [1, 2, "changed_2"]
     assert result_y2 == {"a": 0, "new": "changed_2"}
+
+def test_not_every_arg_defaulted():
+    """Test functions with args that dont have default values"""
+    
+    @smart_args(pos_args=True)
+    def f(pos1, pos2=Isolated(), *, kw1, kw2=Evaluated(lambda: "!!!")):
+        pos2.append(pos1)
+        return {
+            'pos1': pos1,
+            'pos2': pos2,
+            'kw1': kw1,
+            'kw2': kw2
+        }
+    
+    isolated = ["a"]
+    
+    result = f(10, isolated, kw1=5)
+    assert result['pos1'] == 10
+    assert result['pos2'] == ["a", 10]
+    assert isolated == ["a"]
+    assert result['kw1'] == 5
+    assert result['kw2'] == "!!!"

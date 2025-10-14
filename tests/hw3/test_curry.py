@@ -10,8 +10,6 @@ def test_curry_basic():
 
     curried = curry_explicit(add, 3)
     assert curried(1)(2)(3) == 6
-    assert curried(1, 2)(3) == 6
-    assert curried(1, 2, 3) == 6
 
 
 def test_curry_single_arity():
@@ -42,18 +40,6 @@ def test_curry_negative_arity():
 
     with pytest.raises(ValueError, match="Arity cannot be negative"):
         curry_explicit(func, -1)
-
-
-def test_curry_too_many_arguments():
-    """Test that too many arguments raises error"""
-
-    def func(x, y):
-        return x + y
-
-    curried = curry_explicit(func, 2)
-
-    with pytest.raises(ValueError, match="Too many arguments"):
-        curried(1)(2, 3)
 
 
 def test_uncurry_basic():
@@ -98,3 +84,30 @@ def test_curry_uncurry():
     uncurried = uncurry_explicit(curried, 3)
 
     assert uncurried(2, 3, 4) == original(2, 3, 4)
+
+
+def test_builtin_functions():
+    """Test currying with built-in functions"""
+
+    curried_abs = curry_explicit(abs, 1)
+    assert curried_abs(-5) == 5
+    assert curried_abs(10) == 10
+
+    curried_pow = curry_explicit(pow, 2)
+    power_of_2 = curried_pow(2)
+    assert curried_pow(2)(3) == 8
+    assert curried_pow(3)(3) == 27
+
+
+def test_functions_with_arbitrary_arity():
+    """Test currying with functions that have arbitrary arity"""
+
+    curried_print_2 = curry_explicit(print, 2)
+
+    curried_max = curry_explicit(max, 2)
+    assert curried_max(3)(5) == 5
+    assert curried_max(7)(20) == 20
+
+    curried_min = curry_explicit(min, 3)
+    assert curried_min(-1)(5)(3) == -1
+    assert curried_min(-2)(-5)(0) == -5

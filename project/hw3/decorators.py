@@ -25,19 +25,18 @@ class Isolated:
     pass
 
 
-def smart_args(*, capacity: int = 0, pos_args: bool = False) -> Callable[..., Any]:
+def smart_args(*, pos_args: bool = False) -> Callable[..., Any]:
     """
-    Decorator for caching function results with smart argument handling.
+    Decorator for smart argument handling with Evaluated and Isolated types.
 
     Args:
-        capacity: Maximum number of results to cache. If 0, caching is disabled.
+        pos_args: Whether to handle positional arguments with smart defaults.
 
     Returns:
         A decorator that wraps a given function.
     """
 
     def decorator(func: Callable[..., Any]) -> Callable[..., Any]:
-        cache: OrderedDict = OrderedDict()
         spec = inspect.getfullargspec(func)
 
         @wraps(func)
@@ -88,6 +87,29 @@ def smart_args(*, capacity: int = 0, pos_args: bool = False) -> Callable[..., An
                         args_l[shift + i] = copy.deepcopy(args_l[shift + i])
                 args = tuple(args_l)
 
+            return func(*args, **kwargs)
+
+        return inner
+
+    return decorator
+    
+    
+def cache(*, capacity: int = 0) -> Callable[..., Any]:
+    """
+    Decorator for caching function results.
+
+    Args:
+        capacity: Maximum number of results to cache. If 0, caching is disabled.
+
+    Returns:
+        A decorator that wraps a given function.
+    """
+
+    def decorator(func: Callable[..., Any]) -> Callable[..., Any]:
+        cache_dict: OrderedDict = OrderedDict()
+
+        @wraps(func)
+        def inner(*args: Any, **kwargs: Any) -> Any:
             if capacity <= 0:
                 return func(*args, **kwargs)
             try:
@@ -95,15 +117,15 @@ def smart_args(*, capacity: int = 0, pos_args: bool = False) -> Callable[..., An
             except TypeError:
                 return func(*args, **kwargs)
 
-            if key in cache:
-                cache.move_to_end(key)
-                return cache[key]
+            if key in cache_dict:
+                cache_dict.move_to_end(key)
+                return cache_dict[key]
 
-            if len(cache) == capacity:
-                cache.popitem(last=False)
+            if len(cache_dict) == capacity:
+                cache_dict.popitem(last=False)
 
-            cache[key] = func(*args, **kwargs)
-            return cache[key]
+            cache_dict[key] = func(*args, **kwargs)
+            return cache_dict[key]
 
         return inner
 
