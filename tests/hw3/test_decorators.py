@@ -183,3 +183,59 @@ def test_not_every_arg_defaulted():
     assert isolated == ["a"]
     assert result["kw1"] == 5
     assert result["kw2"] == "!!!"
+
+
+def test_cache_capacity_history():
+    """Test that cache removes oldest values which exceeds capacity limits"""
+
+    call_count = 0
+
+    @cache(capacity=2)
+    def square(x):
+        nonlocal call_count
+        call_count += 1
+        return x * x
+
+    square(1)
+    assert call_count == 1
+    square(2)
+    assert call_count == 2
+    square(2)
+    assert call_count == 2
+    square(3)
+    assert call_count == 3
+    square(1)
+    assert call_count == 4
+
+
+def test_cache_builtin_functions():
+    """Test cache with builtin functions"""
+
+    len_calls = 0
+    print_calls = 0
+
+    @cache(capacity=2)
+    def cached_len(x):
+        nonlocal len_calls
+        len_calls += 1
+        return len(x)
+
+    @cache(capacity=2)
+    def cached_print(x):
+        nonlocal print_calls
+        print_calls += 1
+        return print(x)
+
+    cached_len("hello")
+    assert len_calls == 1
+    cached_len("world")
+    assert len_calls == 2
+    cached_len("hello")
+    assert len_calls == 2
+
+    cached_print("1")
+    assert print_calls == 1
+    cached_print("2")
+    assert print_calls == 2
+    cached_print("1")
+    assert print_calls == 2

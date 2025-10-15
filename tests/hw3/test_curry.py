@@ -102,8 +102,6 @@ def test_builtin_functions():
 def test_functions_with_arbitrary_arity():
     """Test currying with functions that have arbitrary arity"""
 
-    curried_print_2 = curry_explicit(print, 2)
-
     curried_max = curry_explicit(max, 2)
     assert curried_max(3)(5) == 5
     assert curried_max(7)(20) == 20
@@ -111,3 +109,17 @@ def test_functions_with_arbitrary_arity():
     curried_min = curry_explicit(min, 3)
     assert curried_min(-1)(5)(3) == -1
     assert curried_min(-2)(-5)(0) == -5
+
+
+def test_one_at_the_time():
+    "Test that curried functions take one argument at the time"
+
+    f = curry_explicit((lambda x, y, z: f"<{x},{y},{z}>"), 3)
+
+    assert f(123)(456)(562) == "<123,456,562>"
+
+    with pytest.raises(TypeError, match="takes 1 positional argument but 2 were given"):
+        f(123, 456)(562)
+
+    with pytest.raises(TypeError, match="takes 1 positional argument but 3 were given"):
+        f(123, 456, 562)
