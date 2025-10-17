@@ -121,5 +121,8 @@ def test_one_at_the_time():
     with pytest.raises(TypeError, match="takes 1 positional argument but 2 were given"):
         f(123, 456)(562)
 
+    with pytest.raises(TypeError, match="takes 1 positional argument but 2 were given"):
+        f(123)(456, 562)
+
     with pytest.raises(TypeError, match="takes 1 positional argument but 3 were given"):
         f(123, 456, 562)
